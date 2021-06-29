@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+
+###############################################
+#       lui-payload-parse.py
+#
+# This script is used to parse a LUI payload (upload_xxxxxxxxx.zip)
+# file, by expanding the ZIP file and parsing the XML files contained
+# therein.
+#
+# USE AT OWN RISK - NO WARANTY PROVIDED
+#
+# Author. Stuart Parkington, Lead SE, CSP EMEA
+#
+#
+
 import xml.etree.ElementTree as ET
 from datetime import datetime as dt
 from zipfile import ZipFile
@@ -55,7 +69,7 @@ def remove_temp_payload_dir(infolder):
 # Format and output lines, either to screen or both screen + file
 def tab_output(instring, inval = "", width = 30):
 	out_string = "{} {}".format(instring.ljust(width), inval)
-	if output_flag:
+	if output_flag or quiet_flag:
 		outfile = open(output_file, 'a')
 		outfile.write(out_string + "\n")
 		outfile.close
@@ -73,9 +87,9 @@ def main():
 	parser.add_argument('-u', '--users', action='store_true', help="Include active users for each user billable SKU.")
 	parser.add_argument('-a', '--all-skus', action='store_true', help="Include SKUs that aren't billable.")
 	parser.add_argument('-s', '--serial-numbers', action='store_true', help="Include license serial numbers.")
-	parser.add_argument('-l', '--license-server-plaform', action='store_true', help="Include License Server Platform details.")
+	parser.add_argument('-l', '--license-server-platform', action='store_true', help="Include License Server Platform details.")
 	parser.add_argument('-m', '--manifest', action='store_true', help="Include manifest data in output.")
-	parser.add_argument('-q', '--quiet', action='store_true', help="Quieten output. Only really makes sense if used with the -o/--output-to-file switch.")
+	parser.add_argument('-q', '--quiet', action='store_true', help="Quieten output. Automatically forces output to file.")
 	args = parser.parse_args()
 
 	basedir = os.path.dirname(os.path.abspath(args.payload))
@@ -133,7 +147,7 @@ def main():
 		tab_output("  Anonymised:", privsetting)
         
         # Include License Server Platform details, if -l flag set
-		if args.license_server_plaform:
+		if args.license_server_platform:
 			# LS Platform Details
 			windowsplatform = lsinfo.find('WindowsProductName').text
 			windowsver = lsinfo.find('OS').text
@@ -156,7 +170,13 @@ def main():
 		feature_id = feature.find('ID').text
 		sa_date = feature.find('SADate').attrib
 		
-		if feature_id == 'CITRIX' or feature_id == 'CTXLSDIAG' or feature_id == 'PVSD_STD_CCS':
+		if feature_id == 'CITRIX' \
+			or feature_id == 'CTXLSDIAG' \
+			or feature_id == 'PVSD_STD_CCS' \
+			or feature_id == 'CEHV_PLT_CCS' \
+			or feature_id == 'CXS_ENT2_CCS' \
+			or feature_id == 'CXS_PLT_CCS' \
+			or feature_id == 'PVS_STD_CCS' :
 			# Include non chargable SKUs, if -a flag set
 			if args.all_skus:
 				tab_output("\nProduct:", feature_id)

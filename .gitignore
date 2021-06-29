@@ -1,6 +1,8 @@
 .DS_Store
 .python-version
 git_ignore_files/
+upload_*.zip
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
